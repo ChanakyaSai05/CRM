@@ -8,8 +8,8 @@ import Admin from "./pages/Admin";
 import Customer from "./pages/Customer";
 import Engineer from "./pages/Engineer";
 import RequireAuth from "./component/RequireAuth";
-import Notfound from "./pages/Notfound";
-import Unauthorised from "./pages/Unauthorised";
+import Notfound from "./component/Notfound";
+import Unauthorised from "./component/Unauthorised";
 const ROLES = {
   CUSTOMER: "CUSTOMER",
   ENGINEER: "ENGINEER",

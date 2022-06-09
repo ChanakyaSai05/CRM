@@ -2,12 +2,14 @@ import React, { useState } from "react";
 import "../styles/Login.css";
 import { Dropdown, DropdownButton } from "react-bootstrap";
 import { userSignUp, userSignIn } from "../api/auth";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
   const [showSignup, setShowSignup] = useState(false);
   const [message, setMessage] = useState("");
   const [userType, setUserType] = useState("CUSTOMER");
   const [userData, setUserData] = useState({});
+  let history = useNavigate();
 
   const loginFn = (e) => {
     const userId = document.getElementById("userId").value;
@@ -34,11 +36,17 @@ function Login() {
 
             //customer,engineer,admin
             if (response.data.userTypes === "CUSTOMER") {
-              window.location.href = "/customer";
+              // window.location.href = "/customer";//it is directly accessing the dom element //we can use this but direct connection is not feasable
+              //thats why we are using navigate
+              //In react virtual dom is there it is in between react project and real dom
+              // virtual dom checks what changes it happened and updates in real dom
+              history("/customer");
             } else if (response.data.userTypes === "ENGINEER") {
-              window.location.href = "/engineer";
+              // window.location.href = "/engineer";
+              history("/engineer");
             } else {
-              window.location.href = "/admin";
+              // window.location.href = "/admin";
+              history("/admin");
             }
           }
         }
@@ -54,6 +62,7 @@ function Login() {
   const updateSignupData = (e) => {
     //2nd way of storing data
     userData[e.target.id] = e.target.value;
+    // setUserData(([e.target.id] = e.target.value));//not working like this
     console.log(userData);
   };
   const signupFn = (e) => {
@@ -75,7 +84,13 @@ function Login() {
       .then((response) => {
         // console.log(response);
         if (response.status === 201) {
-          window.location.href = "/";
+          // window.location.href = "/";
+          history("/");
+          //mam used history(0) it is refresh mam said
+        }
+        if (response === 204) {
+          //204 is no content since it is not an error we are redirecting to home
+          history(0);
         }
       })
       .catch((err) => {
