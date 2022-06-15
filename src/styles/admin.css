@@ -5,7 +5,37 @@
   transition: 0.3 ease-in;
   cursor: pointer;
 }
+.border-p {
+  border-bottom: 5px solid orange;
+  border-radius: 5px;
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.08) 0 6px 10px rgba(0, 0, 0, 0.05);
+  transition: 0.3 ease-in;
+  cursor: pointer;
+}
+.border-c {
+  border-bottom: 5px solid green;
+  border-radius: 5px;
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.08) 0 6px 10px rgba(0, 0, 0, 0.05);
+  transition: 0.3 ease-in;
+  cursor: pointer;
+}
+.border-bl {
+  border-bottom: 5px solid gray;
+  border-radius: 5px;
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.08) 0 6px 10px rgba(0, 0, 0, 0.05);
+  transition: 0.3 ease-in;
+  cursor: pointer;
+}
 
 .border-b:hover {
+  transform: scale(1.05);
+}
+.border-p:hover {
+  transform: scale(1.05);
+}
+.border-c:hover {
+  transform: scale(1.05);
+}
+.border-bl:hover {
   transform: scale(1.05);
 }
