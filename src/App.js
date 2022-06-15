@@ -2,7 +2,10 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Suspense } from "react";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap-icons/font/bootstrap-icons.css";
+import "@coreui/coreui/dist/css/coreui.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
+import "react-circular-progressbar/dist/styles.css";
 import Login from "./pages/Login";
 import Admin from "./pages/Admin";
 import Customer from "./pages/Customer";
@@ -28,9 +31,9 @@ function App() {
             </Suspense>
           }
         />
-        <Route element={<RequireAuth allowedRoles={[ROLES.ADMIN]} />}>
-          <Route path="/admin" exact element={<Admin />} />
-        </Route>
+        {/* <Route element={<RequireAuth allowedRoles={[ROLES.ADMIN]} />}> */}
+        <Route path="/admin" exact element={<Admin />} />
+        {/* </Route> */}
 
         <Route element={<RequireAuth allowedRoles={[ROLES.ENGINEER]} />}>
           <Route path="/engineer" exact element={<Engineer />} />
