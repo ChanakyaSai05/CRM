@@ -22,6 +22,9 @@ export async function userUpdation(userId, data) {
     },
     {
       userId: localStorage.getItem("userId"),
+    },
+    {
+      userType: localStorage.getItem("userTypes"),
     }
   );
 }

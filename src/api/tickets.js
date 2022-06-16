@@ -29,3 +29,28 @@ export async function fetchTicket(data) {
     }
   );
 }
+//
+//ticket update
+export async function ticketUpdation(id, data) {
+  return await axios.put(
+    `${API_BASE_URL}/crm/api/v1/tickets/${id}`,
+    data,
+    {
+      headers: {
+        "x-access-token": localStorage.getItem("token"),
+      },
+    },
+    {
+      status: localStorage.getItem("userStatus"),
+    }
+  );
+}
+//
+//single ticket
+export async function singleTicket(id) {
+  return await axios.get(`${API_BASE_URL}/crm/api/v1/tickets/${id}`, {
+    headers: {
+      "x-access-token": localStorage.getItem("token"),
+    },
+  });
+}

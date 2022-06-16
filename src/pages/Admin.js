@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import Sidebar from "../component/Sidebar";
 import MaterialTable from "@material-table/core";
@@ -7,16 +8,30 @@ import "../styles/admin.css";
 import { ExportCsv, ExportPdf } from "@material-table/exporters";
 import { fetchTicket } from "../api/tickets";
 import { getAllUsers, getCurrUser, userUpdation } from "../api/user";
+import { ticketUpdation, singleTicket } from "../api/tickets";
 function Admin() {
   const [userModal, setUserModal] = useState(false);
+  const [ticketModal, setTicketModal] = useState(false);
   const [ticketDetails, setTicketDetails] = useState([]);
   const [userDetails, setUserDetails] = useState([]);
   const [editUser, setEditUser] = useState({});
+  const [rowObj, setRowObj] = useState({});
+  const dref = useRef();
+  const pref = useRef();
+  const sref = useRef();
+  const aref = useRef();
+  const history = useNavigate();
   const showUserModal = () => {
     setUserModal(true);
   };
+  const showTicketModal = () => {
+    setTicketModal(true);
+  };
   const closeUserModal = () => {
     setUserModal(false);
+  };
+  const closeTicketModal = () => {
+    setTicketModal(false);
   };
 
   useEffect(() => {
@@ -96,6 +111,48 @@ function Admin() {
       .then((res) => console.log(res))
       .catch((err) => console.log(err));
   };
+  //
+  // updateTicketData
+  const updateTicketData = (e) => {
+    // 1.Not working
+    // const description = document.getElementById("description");
+    // const priority = document.getElementById("ticketPriority");
+    // const status = document.getElementById("status");
+    // const assignee = document.getElementById("assignee");
+    // setRowObj({
+    //   description: description,
+    //   ticketPriority: priority,
+    //   status: status,
+    //   assignee: assignee,
+    // });
+    //2.Not Working
+    // rowObj[e.target.id] = e.target.value;
+    //3.ref method
+    let description = dref.current.value;
+    let ticketPriority = pref.current.value;
+    let status = sref.current.value;
+    let assignee = aref.current.value;
+    setRowObj({ ...rowObj, description, ticketPriority, status, assignee });
+  };
+  console.log(rowObj);
+  //
+  //submit Edit ticket function
+  const submitModalTicketFn = () => {
+    let id = rowObj.id;
+    let data = {
+      description: rowObj.description,
+      ticketPriority: rowObj.ticketPriority,
+      status: rowObj.status,
+      assignee: rowObj.assignee,
+    };
+    ticketUpdation(id, data)
+      .then((res) => {
+        console.log("success", res);
+        history(0);
+      })
+      .catch((err) => console.log(err));
+  };
+
   return (
     <div className="bg-light vh-100">
       <div className="row">
@@ -228,6 +285,15 @@ function Admin() {
           <hr />
           <div className="container">
             <MaterialTable
+              onRowClick={(e, rowData) => {
+                // console.log(rowData);
+                setRowObj(rowData);
+                // console.log(rowObj);
+                // singleTicket(rowObj.id)
+                //   .then((res) => console.log(res))
+                //   .catch((err) => console.log(err));
+                showTicketModal();
+              }}
               columns={[
                 {
                   title: "Ticket ID",
@@ -414,6 +480,75 @@ function Admin() {
                 <button
                   className="btn btn-sm btn-primary "
                   onClick={submitModalFn}
+                >
+                  Submit
+                </button>
+              </div>
+              {/* </form> */}
+            </Modal.Body>
+          </Modal>
+          <Modal
+            show={ticketModal}
+            onHide={closeTicketModal}
+            backdrop="static"
+            centered
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>Edit Details</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              {/* <form> */}
+              <div className="p-1">
+                {/* <h5 className="text-primary">User ID :</h5> */}
+                <div className="input-group">
+                  <label className="input-group-text">
+                    Description{" "}
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="description"
+                      value={rowObj.description}
+                      onChange={updateTicketData}
+                      ref={dref}
+                    />{" "}
+                  </label>
+                  <label className="input-group-text">
+                    Priority{" "}
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="ticketPriority"
+                      value={rowObj.ticketPriority}
+                      onChange={updateTicketData}
+                      ref={pref}
+                    />{" "}
+                  </label>
+                  <label className="input-group-text">
+                    Status{" "}
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="status"
+                      value={rowObj.status}
+                      onChange={updateTicketData}
+                      ref={sref}
+                    />{" "}
+                  </label>
+                  <label className="input-group-text">
+                    Assignee{" "}
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="assignee"
+                      value={rowObj.assignee}
+                      onChange={updateTicketData}
+                      ref={aref}
+                    />{" "}
+                  </label>
+                </div>
+                <button
+                  className="btn btn-sm btn-primary "
+                  onClick={submitModalTicketFn}
                 >
                   Submit
                 </button>
