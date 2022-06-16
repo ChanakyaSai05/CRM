@@ -6,7 +6,7 @@ import { Modal } from "react-bootstrap";
 import "../styles/admin.css";
 import { ExportCsv, ExportPdf } from "@material-table/exporters";
 import { fetchTicket } from "../api/tickets";
-import { getAllUsers, ticketUpdation, getCurrUser } from "../api/user";
+import { getAllUsers, getCurrUser, userUpdation } from "../api/user";
 function Admin() {
   const [userModal, setUserModal] = useState(false);
   const [ticketDetails, setTicketDetails] = useState([]);
@@ -58,12 +58,19 @@ function Admin() {
     const email = document.getElementById("email").value;
     const userTypes = document.getElementById("userTypes").value;
     const userStatus = document.getElementById("userStatus").value;
+    // setEditUser({
+    //   name: name,
+    //   email: email,
+    //   userTypes: userTypes,
+    //   userStatus: userStatus,
+    // });
     setEditUser({
-      name: name,
-      email: email,
-      userTypes: userTypes,
-      userStatus: userStatus,
-    });
+      ...editUser,
+      name,
+      email,
+      userTypes,
+      userStatus,
+    }); //we can do like this also it is working.
   };
   console.log(editUser);
 
@@ -75,8 +82,13 @@ function Admin() {
     //   .then((res) => console.log(res))
     //   .catch((err) => console.log(err));
     // //
+    let obj = {
+      userName: editUser.userName,
+      userStatus: editUser.userStatus,
+      userType: editUser.userTypes,
+    };
 
-    ticketUpdation(userId, editUser)
+    userUpdation(userId, obj)
       .then((res) => console.log("Ticket updated successfully", res))
       .catch((err) => console.log(err));
     //checking the user is updated or not

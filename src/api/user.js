@@ -11,7 +11,7 @@ export async function getAllUsers() {
   });
 }
 
-export async function ticketUpdation(userId, data) {
+export async function userUpdation(userId, data) {
   return await axios.put(
     `${API_BASE_URL}/crm/api/v1/users/${userId}`,
     data,
