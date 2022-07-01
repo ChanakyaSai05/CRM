@@ -114,12 +114,12 @@ function Login() {
         id="loginPage"
         className="bg-primary d-flex justify-content-center align-items-center vh-100"
       >
-        <div className="card m-5 p-5">
-          <div className="row m-2">
+        <div className="card m-5 p-5 ">
+          <div className="row m-2 bg-white">
             <div className="col">
               {!showSignup ? (
                 <div>
-                  <h4 className="text-center">Login</h4>
+                  <h4 className="text-center my-2">Login</h4>
                   <form onSubmit={loginFn}>
                     <div className="input-group m-1">
                       <input
@@ -149,7 +149,8 @@ function Login() {
                       />
                     </div>
                     <div
-                      className="signup-btn text-right text-info "
+                      className="signup-btn text-center text-info "
+                      style={{ cursor: "pointer" }}
                       onClick={toggleSignup}
                     >
                       Dont have an Account ? Signup
@@ -169,10 +170,6 @@ function Login() {
                         className="form-control"
                         placeholder="UserId"
                         id="userId"
-                        // onChange={(e) => {
-                        //   let userId = e.target.value;
-                        //   setUserData({ ...userData, userId: userId });
-                        // }}
                         onChange={updateSignupData}
                         required
                       />
@@ -183,10 +180,6 @@ function Login() {
                         className="form-control"
                         placeholder="Username"
                         id="username"
-                        // onChange={(e) => {
-                        //   let userName = e.target.value;
-                        //   setUserData({ ...userData, userName: userName });
-                        // }}
                         onChange={updateSignupData}
                         required
                       />
@@ -197,10 +190,6 @@ function Login() {
                         className="form-control"
                         placeholder="Email"
                         id="email"
-                        // onChange={(e) => {
-                        //   let email = e.target.value;
-                        //   setUserData({ ...userData, email: email });
-                        // }}
                         onChange={updateSignupData}
                         required
                       />
@@ -211,10 +200,6 @@ function Login() {
                         className="form-control"
                         placeholder="Password"
                         id="password"
-                        // onChange={(e) => {
-                        //   let password = e.target.value;
-                        //   setUserData({ ...userData, password: password });
-                        // }}
                         onChange={updateSignupData}
                         required
                       />
@@ -245,10 +230,11 @@ function Login() {
                       />
                     </div>
                     <div
-                      className="signup-btn text-right text-info"
+                      className="signup-btn text-center text-info"
+                      style={{ cursor: "pointer" }}
                       onClick={toggleSignup}
                     >
-                      Dont have an Account ? Signup
+                      Already have an Account ? Login
                     </div>
                     <div className="auth-error-msg text-danger text-center">
                       {message}

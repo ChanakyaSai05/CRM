@@ -8,7 +8,8 @@ import "../styles/admin.css";
 import { ExportCsv, ExportPdf } from "@material-table/exporters";
 import { fetchTicket } from "../api/tickets";
 import { getAllUsers, getCurrUser, userUpdation } from "../api/user";
-import { ticketUpdation, singleTicket } from "../api/tickets";
+import { ticketUpdation } from "../api/tickets";
+// import TicketModal from "../component/TicketModal";
 function Admin() {
   const [userModal, setUserModal] = useState(false);
   const [ticketModal, setTicketModal] = useState(false);
@@ -16,10 +17,12 @@ function Admin() {
   const [userDetails, setUserDetails] = useState([]);
   const [editUser, setEditUser] = useState({});
   const [rowObj, setRowObj] = useState({});
+  const [message, setMessage] = useState("");
   const dref = useRef();
   const pref = useRef();
   const sref = useRef();
   const aref = useRef();
+  // const [dref, pref, sref, aref] = [useRef(), useRef(), useRef(), useRef()];
   const history = useNavigate();
   const showUserModal = () => {
     setUserModal(true);
@@ -48,13 +51,30 @@ function Admin() {
       .then((res) => {
         if (res.status === 200) {
           console.log(res);
-          setTicketDetails(res.data);
+          let open = res.data.filter((item) => item.status === "OPEN");
+          console.log(open);
+          let progress = res.data.filter(
+            (item) => item.status === "IN_PROGRESS"
+          );
+          let blocked = res.data.filter((item) => item.status === "BLOCKED");
+          let closed = res.data.filter((item) => item.status === "CLOSED");
+
+          setTicketDetails({
+            data: res.data,
+            open: open.length,
+            progress: progress.length,
+            blocked: blocked.length,
+            closed: closed.length,
+          });
+          //or we can use forEach as did by mam we will do in engineer page
+          //In that we will use object.assign(so that it will update data only the updated one it will prevent every time updation )
         }
       })
       .catch((error) => {
         console.log(error);
       });
   };
+
   //get all users
   const getUsers = () => {
     // let userId = localStorage.getItem("userId");
@@ -65,79 +85,67 @@ function Admin() {
           setUserDetails(res.data);
         }
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        if (err.response.status === 401) {
+          logoutFn();
+        } else {
+          setMessage(err);
+        }
+      });
   };
   //updating userdata
   const updateUserData = (e) => {
     const name = document.getElementById("name").value;
-    const email = document.getElementById("email").value;
     const userTypes = document.getElementById("userTypes").value;
     const userStatus = document.getElementById("userStatus").value;
-    // setEditUser({
-    //   name: name,
-    //   email: email,
-    //   userTypes: userTypes,
-    //   userStatus: userStatus,
-    // });
     setEditUser({
       ...editUser,
       name,
-      email,
       userTypes,
       userStatus,
-    }); //we can do like this also it is working.
+    });
   };
   console.log(editUser);
 
   //Editing from modal
-  const submitModalFn = () => {
-    const userId = editUser.userId;
-    // //
-    // getCurrUser(userId)
-    //   .then((res) => console.log(res))
-    //   .catch((err) => console.log(err));
-    // //
-    let obj = {
-      userName: editUser.userName,
+  const submitModalFn = (e) => {
+    e.preventDefault();
+    let userId = editUser.userId;
+    let data = {
+      userName: editUser.name,
       userStatus: editUser.userStatus,
       userType: editUser.userTypes,
     };
-
-    userUpdation(userId, obj)
-      .then((res) => console.log("Ticket updated successfully", res))
+    userUpdation(userId, data)
+      .then((res) => {
+        console.log("User details updated successfully", res);
+        // history(0);
+        getUsers();
+        closeUserModal();
+      })
       .catch((err) => console.log(err));
     //checking the user is updated or not
-    getCurrUser(userId)
-      .then((res) => console.log(res))
-      .catch((err) => console.log(err));
+    // getCurrUser(userId)
+    //   .then((res) => console.log(res))
+    //   .catch((err) => console.log(err));
   };
   //
   // updateTicketData
   const updateTicketData = (e) => {
-    // 1.Not working
-    // const description = document.getElementById("description");
-    // const priority = document.getElementById("ticketPriority");
-    // const status = document.getElementById("status");
-    // const assignee = document.getElementById("assignee");
-    // setRowObj({
-    //   description: description,
-    //   ticketPriority: priority,
-    //   status: status,
-    //   assignee: assignee,
-    // });
-    //2.Not Working
-    // rowObj[e.target.id] = e.target.value;
-    //3.ref method
+    //Not Working
+    rowObj[e.target.id] = e.target.value;
+    //ref method
     let description = dref.current.value;
     let ticketPriority = pref.current.value;
     let status = sref.current.value;
     let assignee = aref.current.value;
     setRowObj({ ...rowObj, description, ticketPriority, status, assignee });
   };
-  console.log(rowObj);
+  // console.log(rowObj);
   //
   //submit Edit ticket function
-  const submitModalTicketFn = () => {
+  const submitModalTicketFn = (e) => {
+    e.preventDefault();
     let id = rowObj.id;
     let data = {
       description: rowObj.description,
@@ -148,28 +156,44 @@ function Admin() {
     ticketUpdation(id, data)
       .then((res) => {
         console.log("success", res);
-        history(0);
+        setMessage("Details Updated Successfully");
+        // history(0);
+        fetchTickets();
+        closeTicketModal();
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        if (err.response.status === 401) {
+          logoutFn();
+        } else {
+          console.log(err);
+        }
+      });
   };
-
+  //logout
+  const logoutFn = () => {
+    localStorage.clear();
+    history("/");
+  };
   return (
-    <div className="bg-light vh-100">
+    <div className="bg-light min-vh-100">
       <div className="row">
         <div className="col-1">
-          <Sidebar />
+          <Sidebar home />
         </div>
         <div className="container col m-2">
-          <h3 className="text-primary text-center">Welcome Admin</h3>
+          <h3 className="text-primary text-center">
+            Welcome {localStorage.getItem("name")}
+          </h3>
           <p className="text-muted text-center">
             Take a quick look at your stats below
           </p>
 
           {/* STATS CARDS START HERE */}
-          <div className="row my-5 mx-2 text-center">
+          {/* <div className="row my-5 mx-5 text-center"> */}
+          <div className="container d-flex mx-5">
             <div className="col my-1 p-2 mx-3 ">
               <div
-                className="card bg-primary bg-opacity-25 "
+                className="card bg-primary bg-opacity-25  "
                 style={{ width: 12 + "rem" }}
               >
                 <div className="cardbody border-b p-2">
@@ -179,11 +203,11 @@ function Admin() {
                   </h5>
                   <hr />
                   <div className="row">
-                    <div className="col">8</div>
+                    <div className="col">{ticketDetails.open}</div>
                     <div className="col">
                       <div style={{ height: 30, width: 30 }}>
                         <CircularProgressbar
-                          value={80}
+                          value={ticketDetails.open}
                           styles={buildStyles({
                             textColor: "blue",
                             pathColor: "darkBlue",
@@ -208,11 +232,11 @@ function Admin() {
                   </h5>
                   <hr />
                   <div className="row">
-                    <div className="col">4</div>
+                    <div className="col">{ticketDetails.progress}</div>
                     <div className="col">
                       <div style={{ height: 30, width: 30 }}>
                         <CircularProgressbar
-                          value={80}
+                          value={ticketDetails.progress}
                           styles={buildStyles({
                             textColor: "blue",
                             pathColor: "Gold",
@@ -236,11 +260,11 @@ function Admin() {
                   </h5>
                   <hr />
                   <div className="row">
-                    <div className="col">2</div>
+                    <div className="col">{ticketDetails.closed}</div>
                     <div className="col">
                       <div style={{ height: 30, width: 30 }}>
                         <CircularProgressbar
-                          value={80}
+                          value={ticketDetails.closed}
                           styles={buildStyles({
                             textColor: "blue",
                             pathColor: "darkGreen",
@@ -264,11 +288,11 @@ function Admin() {
                   </h5>
                   <hr />
                   <div className="row">
-                    <div className="col">2</div>
+                    <div className="col">{ticketDetails.blocked}</div>
                     <div className="col">
                       <div style={{ height: 30, width: 30 }}>
                         <CircularProgressbar
-                          value={80}
+                          value={ticketDetails.blocked}
                           styles={buildStyles({
                             textColor: "blue",
                             pathColor: "darkGrey",
@@ -283,7 +307,8 @@ function Admin() {
           </div>
 
           <hr />
-          <div className="container">
+          <div className="container" id="target_ticket">
+            <h5 className="text-center">{message}</h5>
             <MaterialTable
               onRowClick={(e, rowData) => {
                 // console.log(rowData);
@@ -331,6 +356,7 @@ function Admin() {
                 },
               ]}
               options={{
+                filtering: true, //this is for extra row for lookup filter
                 exportMenu: [
                   {
                     label: "Export Pdf",
@@ -357,12 +383,12 @@ function Admin() {
               //     status: "PENDING",
               //   },
               // ]}
-              data={ticketDetails}
-              title="USER RECORDS"
+              data={ticketDetails.data}
+              title="TICKET RECORDS"
             />
           </div>
           <hr />
-          <div className="container">
+          <div className="container" id="target_users">
             <MaterialTable
               onRowClick={(e, rowData) => {
                 console.log(rowData);
@@ -399,12 +425,12 @@ function Admin() {
                   {
                     label: "Export Pdf",
                     exportFunc: (cols, datas) =>
-                      ExportPdf(cols, datas, "Ticket Records"),
+                      ExportPdf(cols, datas, "User Records"),
                   },
                   {
                     label: "Export Csv",
                     exportFunc: (cols, datas) =>
-                      ExportCsv(cols, datas, "Ticket Records"),
+                      ExportCsv(cols, datas, "User Records"),
                   },
                 ],
                 headerStyle: {
@@ -419,9 +445,6 @@ function Admin() {
               title="USER RECORDS"
             />
           </div>
-          <button className="btn btn-primary" onClick={showUserModal}>
-            Open Modal
-          </button>
           <Modal
             show={userModal}
             onHide={closeUserModal}
@@ -432,12 +455,17 @@ function Admin() {
               <Modal.Title>Edit Details</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-              {/* <form> */}
-              <div className="p-1">
-                {/* <h5 className="text-primary">User ID :</h5> */}
-                <div className="input-group">
-                  <label className="input-group-text">
-                    Name{" "}
+              <form onSubmit={submitModalFn}>
+                <div className="p-1">
+                  <h5 className="text-primary">User ID :{editUser.userId}</h5>
+                  <hr />
+                  <div className="input-group mb-3">
+                    <label
+                      className="input-group-text d-flex justify-content-center"
+                      style={{ width: 7 + "rem" }}
+                    >
+                      Name{" "}
+                    </label>
                     <input
                       type="text"
                       className="form-control"
@@ -445,48 +473,63 @@ function Admin() {
                       value={editUser.name}
                       onChange={updateUserData}
                     />{" "}
-                  </label>
-                  <label className="input-group-text">
-                    Email{" "}
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="email"
-                      value={editUser.email}
-                      onChange={updateUserData}
-                    />{" "}
-                  </label>
-                  <label className="input-group-text">
-                    UserStatus{" "}
-                    <input
-                      type="text"
-                      className="form-control"
+                  </div>
+                  <div className="input-group mb-3">
+                    <label
+                      className="input-group-text d-flex justify-content-center"
+                      style={{ width: 7 + "rem" }}
+                    >
+                      UserStatus{" "}
+                    </label>
+                    <select
                       id="userStatus"
+                      className="form-select"
                       value={editUser.userStatus}
                       onChange={updateUserData}
-                    />{" "}
-                  </label>
-                  <label className="input-group-text">
-                    UserTypes{" "}
-                    <input
-                      type="text"
-                      className="form-control"
+                    >
+                      <option>APPROVED</option>
+                      <option>PENDING</option>
+                    </select>
+                  </div>
+                  <div className="input-group mb-3">
+                    <label
+                      className="input-group-text d-flex justify-content-center "
+                      style={{ width: 7 + "rem" }}
+                    >
+                      UserTypes{" "}
+                    </label>
+                    <select
+                      className="form-select"
                       id="userTypes"
                       value={editUser.userTypes}
                       onChange={updateUserData}
-                    />{" "}
-                  </label>
+                    >
+                      <option>ADMIN</option>
+                      <option>ENGINEER</option>
+                      <option>CUSTOMER</option>
+                    </select>
+                  </div>
+                  <div className="input-group mb-3">
+                    <button type="submit" className="btn btn-sm btn-primary ">
+                      Submit
+                    </button>
+                  </div>
                 </div>
-                <button
-                  className="btn btn-sm btn-primary "
-                  onClick={submitModalFn}
-                >
-                  Submit
-                </button>
-              </div>
-              {/* </form> */}
+              </form>
             </Modal.Body>
           </Modal>
+          {/* Ticket Modal*/}
+          {/* <TicketModal
+            ticketModal={ticketModal}
+            closeTicketModal={closeTicketModal}
+            submitModalTicketFn={submitModalTicketFn}
+            rowObj={rowObj}
+            updateTicketData={updateTicketData}
+            pref={pref}
+            sref={sref}
+            aref={aref}
+            dref={dref}
+          /> */}
           <Modal
             show={ticketModal}
             onHide={closeTicketModal}
@@ -497,23 +540,17 @@ function Admin() {
               <Modal.Title>Edit Details</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-              {/* <form> */}
-              <div className="p-1">
-                {/* <h5 className="text-primary">User ID :</h5> */}
-                <div className="input-group">
-                  <label className="input-group-text">
-                    Description{" "}
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="description"
-                      value={rowObj.description}
-                      onChange={updateTicketData}
-                      ref={dref}
-                    />{" "}
-                  </label>
-                  <label className="input-group-text">
-                    Priority{" "}
+              <form onSubmit={submitModalTicketFn}>
+                <div className="p-1">
+                  <h5 className="text-primary">Ticket ID: {rowObj.id}</h5>
+                  <hr />
+                  <div className="input-group mb-3">
+                    <label
+                      className="label input-group-text  label-md d-flex justify-content-center"
+                      style={{ width: 7 + "rem" }}
+                    >
+                      PRIORITY
+                    </label>
                     <input
                       type="text"
                       className="form-control"
@@ -521,21 +558,35 @@ function Admin() {
                       value={rowObj.ticketPriority}
                       onChange={updateTicketData}
                       ref={pref}
-                    />{" "}
-                  </label>
-                  <label className="input-group-text">
-                    Status{" "}
-                    <input
-                      type="text"
-                      className="form-control"
+                    />
+                  </div>
+                  <div className="input-group mb-3">
+                    <label
+                      className="label input-group-text label-md d-flex justify-content-center"
+                      style={{ width: 7 + "rem" }}
+                    >
+                      STATUS
+                    </label>
+                    <select
+                      className="form-select"
                       id="status"
+                      ref={sref}
                       value={rowObj.status}
                       onChange={updateTicketData}
-                      ref={sref}
-                    />{" "}
-                  </label>
-                  <label className="input-group-text">
-                    Assignee{" "}
+                    >
+                      <option value="OPEN">OPEN</option>
+                      <option value="IN_PROGRESS">IN_PROGRESS</option>
+                      <option value="BLOCKED">BLOCKED</option>
+                      <option value="CLOSED">CLOSED</option>
+                    </select>
+                  </div>
+                  <div className="input-group mb-3">
+                    <label
+                      className="label input-group-text label-md d-flex justify-content-center"
+                      style={{ width: 7 + "rem" }}
+                    >
+                      ASSIGNEE
+                    </label>
                     <input
                       type="text"
                       className="form-control"
@@ -543,17 +594,32 @@ function Admin() {
                       value={rowObj.assignee}
                       onChange={updateTicketData}
                       ref={aref}
-                    />{" "}
-                  </label>
+                    />
+                  </div>
+
+                  <div className="input-group mb-3">
+                    <label
+                      className="label input-group-text label-md d-flex justify-content-center"
+                      style={{ width: 7 + "rem" }}
+                    >
+                      DESCRIPTION
+                    </label>
+                    <textarea
+                      className="md-textarea form-control"
+                      id="description"
+                      value={rowObj.description}
+                      onChange={updateTicketData}
+                      ref={dref}
+                    ></textarea>
+                  </div>
+
+                  <div className="input-group mb-3 ">
+                    <button type="submit" className="btn btn-md btn-primary ">
+                      Submit
+                    </button>
+                  </div>
                 </div>
-                <button
-                  className="btn btn-sm btn-primary "
-                  onClick={submitModalTicketFn}
-                >
-                  Submit
-                </button>
-              </div>
-              {/* </form> */}
+              </form>
             </Modal.Body>
           </Modal>
         </div>

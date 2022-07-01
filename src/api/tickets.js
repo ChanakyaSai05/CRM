@@ -16,7 +16,7 @@ const API_BASE_URL = process.env.REACT_APP_SERVER_URL;
 // put api : allow the engineer,user to edit the ticket
 // url : crm/api/v1/tickets/${id}
 // Authorization : x-access-token : token , userId: userid
-export async function fetchTicket(data) {
+export async function fetchTicket() {
   return await axios.get(
     `${API_BASE_URL}/crm/api/v1/tickets`,
     {
@@ -41,7 +41,8 @@ export async function ticketUpdation(id, data) {
       },
     },
     {
-      status: localStorage.getItem("userStatus"),
+      // status: localStorage.getItem("userStatus"),
+      userId: localStorage.getItem("userId"),
     }
   );
 }
@@ -49,6 +50,15 @@ export async function ticketUpdation(id, data) {
 //single ticket
 export async function singleTicket(id) {
   return await axios.get(`${API_BASE_URL}/crm/api/v1/tickets/${id}`, {
+    headers: {
+      "x-access-token": localStorage.getItem("token"),
+    },
+  });
+}
+//
+//Ticket Creation
+export async function ticketCreation(data) {
+  return await axios.post(`${API_BASE_URL}/crm/api/v1/tickets/`, data, {
     headers: {
       "x-access-token": localStorage.getItem("token"),
     },

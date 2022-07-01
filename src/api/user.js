@@ -19,13 +19,10 @@ export async function userUpdation(userId, data) {
       headers: {
         "x-access-token": localStorage.getItem("token"),
       },
-    },
-    {
-      userId: localStorage.getItem("userId"),
-    },
-    {
-      userType: localStorage.getItem("userTypes"),
     }
+    // {
+    //   userId: localStorage.getItem("userId"),
+    // }
   );
 }
 //update user details
