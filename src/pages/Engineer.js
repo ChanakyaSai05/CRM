@@ -118,7 +118,7 @@ function Engineer() {
           <Sidebar />
         </div>
         <div className="container col m-2">
-          <h3 className="text-primary text-center">Welcome Admin</h3>
+          <h3 className="text-primary text-center">Welcome Engineer</h3>
           <p className="text-muted text-center">
             Take a quick look at your stats below
           </p>
